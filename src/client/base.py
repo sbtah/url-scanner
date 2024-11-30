@@ -1,22 +1,18 @@
 import httpx
 from httpx import ConnectTimeout, Response
-from src.config import VIRUS_API_KEY
 from src.log import logger
 from logging import Logger
 import time
-import base64
 
 
 class BaseClient:
     """
-    Base spider containing logic for data extracting while crawling or scraping.
-    Each spider inheriting from this class expects to receive UserAgent and Proxy,
-    as well as initial url object.
+    Base Api Client used as a base for other specialized clients.
     """
 
     def __init__(self, *args, **kwargs) -> None:
         self._client: httpx.Client | None = None
-        self.GOOGLE_API_KEY: str = ...
+        # self.GOOGLE_API_KEY: str = ...
         self.logger: Logger = logger
 
     @property
@@ -59,23 +55,23 @@ class BaseClient:
                 current_response_time: float = request_end - request_start
 
                 self.logger.debug(
-                    f'GET: status="{res.status_code}", url="{url}", time="{current_response_time}"',
+                    f'GET: status="{res.status_code}", time="{current_response_time}"',
                 )
                 return res
         except Exception as exc:
             self.logger.error(
-                f'GET status="{exc.__class__}", message="{exc}", url="{url}"', exc_info=True
+                f'GET status="{exc.__class__}", message="{exc}"', exc_info=True
             )
             return None
 
 
-    def post(self, url: str, data: dict) -> Response | None:
+    def post(self, url: str, data: dict | str) -> Response | None:
         """
         Send a POST request to the specified url.
         Return Response object on success.
         - :arg url: String representing an url for API endpoint.
         - :arg headers: Dictionary with prepared headers for this request.
-        - :arg data: Dictionary with data payload.
+        - :arg data: Dictionary or Json with data payload.
         """
         try:
             with self.client() as client:
@@ -91,11 +87,11 @@ class BaseClient:
                 current_response_time: float = request_end - request_start
 
                 self.logger.debug(
-                    f'POST: status="{res.status_code}", url="{url}", time="{current_response_time}"',
+                    f'POST: status="{res.status_code}", time="{current_response_time}"',
                 )
                 return res
         except Exception as exc:
             self.logger.error(
-                f'POST: status="{exc.__class__}", message="{exc}", url="{url}"', exc_info=True
+                f'POST: status="{exc.__class__}", message="{exc}"', exc_info=True
             )
             return None
