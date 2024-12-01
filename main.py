@@ -4,10 +4,13 @@ from src.client.google import GoogleSafeBrowsingApiClient
 from src.client.probe import Probe
 import httpx
 from src.urls.url import Url
+from src.config import VERSION
 from src.scraper.scraper import Scraper
 import asyncio
 from src.config import USER_AGENTS, RESOLUTIONS
 from src.scraper.scraper import Scraper
+import click
+
 
 
 url = "https://www.virustotal.com/api/v3/public/urls"
@@ -28,13 +31,19 @@ def load_urls():
         return [Url(value=line.strip('\n')) for line in lines]
 
 
+@click.command('hello')
+@click.version_option(VERSION, prog_name='URL Scanner')
+def hello():
+    click.echo("Hello, World!")
+
 if __name__ == '__main__':
+    hello()
 
     # # GOOGLE
     # client = GoogleSafeBrowsingApiClient()
-    url_to_test = 'https://bantuan-customer-dana-id.0ffice.biz.id/'
+    # url_to_test = 'https://bantuan-customer-dana-id.0ffice.biz.id/'
     # url_to_test = 'https://wp.pl/'
-    url_object = Url(value=url_to_test)
+    # url_object = Url(value=url_to_test)
     #
     # client.request_url_report(url_to_check=url_object)
     #
@@ -51,8 +60,8 @@ if __name__ == '__main__':
     # print(url_object.virus_phishing_score)
     # print(url_object.virus_error)
 
-    urls = load_urls()
-    urls = urls[30: 36]
+    # urls = load_urls()
+    # urls = urls[30: 36]
 
     # # PROBE
     # probe = Probe(user_agent=USER_AGENTS[0])
@@ -61,6 +70,6 @@ if __name__ == '__main__':
     # print([res.is_alive for res in result])
 
     # Playwright Verify
-    scraper = Scraper()
-    results = asyncio.run(scraper.run_visits(urls_to_check=urls, user_agent=USER_AGENTS[0], resolution=RESOLUTIONS[0]))
-    print([res.browser_data for res in results])
+    # scraper = Scraper()
+    # results = asyncio.run(scraper.run_visits(urls_to_check=urls, user_agent=USER_AGENTS[0], resolution=RESOLUTIONS[0]))
+    # print([res.browser_data for res in results])

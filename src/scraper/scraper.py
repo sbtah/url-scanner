@@ -1,9 +1,8 @@
-from lxml.html import HtmlElement, HTMLParser, fromstring, tostring
-from src.scraper.base import BaseScraper
 import asyncio
 from collections import deque
-from typing import Iterable, Collection
-from asyncio import Future
+from typing import Collection
+
+from src.scraper.base import BaseScraper
 from src.urls.url import Url
 
 

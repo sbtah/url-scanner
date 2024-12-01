@@ -1,6 +1,7 @@
+import base64
+
 from src.client.base import BaseClient
 from src.config import VIRUS_API_KEY
-import base64
 from src.urls.url import Url
 
 
@@ -77,7 +78,7 @@ class VirusTotalApiClient(BaseClient):
         response = self.get(url=self.virus_endpoints['url-report'].format(url_id=url_identifier))
 
         # Store response data on the Url object.
-        url_to_check.virus_data = response.json() if response is not None else None
+        url_to_check.virus_data = dict(**response.json()) if response is not None else None
 
         # Return url object.
         return url_to_check

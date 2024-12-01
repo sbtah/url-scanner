@@ -1,9 +1,9 @@
-from src.config import USER_AGENTS, RESOLUTIONS
-from typing import Collection, Callable
+import asyncio
+from collections import deque
+from typing import Collection
+
 from src.client.base import BaseClient
 from src.urls.url import Url
-from collections import deque
-import asyncio
 
 
 class Probe(BaseClient):

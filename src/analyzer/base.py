@@ -29,7 +29,12 @@ class BaseAnalyzer:
         ...
 
     @staticmethod
-    def create_url_object(self, *, value: str):
+    def create_url(*, value: str) -> Url:
         """"""
         url: Url = Url(value=value)
         return url
+
+
+    def create_urls_set(self, *, urls_collection) -> set[Url]:
+        """"""
+        ...

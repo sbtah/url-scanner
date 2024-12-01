@@ -1,8 +1,9 @@
-from dotenv import load_dotenv
 import os
 
+from dotenv import load_dotenv
 
-load_dotenv()  # take environment variables from .env.
+# Load env variables from file.
+load_dotenv()
 
 
 VIRUS_API_KEY = os.environ.get('VIRUS_TOTAL_API_KEY')

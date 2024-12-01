@@ -1,10 +1,8 @@
-from src.client.base import BaseClient
-from src.config import GOOGLE_API_KEY, VERSION, PROJECT_NAME
 import json
+
+from src.client.base import BaseClient
+from src.config import GOOGLE_API_KEY, PROJECT_NAME, VERSION
 from src.urls.url import Url
-from typing import Collection
-import asyncio
-from collections import deque
 
 
 class GoogleSafeBrowsingApiClient(BaseClient):
@@ -40,13 +38,19 @@ class GoogleSafeBrowsingApiClient(BaseClient):
     ) -> Url:
         """
         Send a post request with url we want to check in Safe Browsing Api.
+        IMPORTANT:
+            Yes, I know I can send many (up to 500) urls at once and this would be the most efficient way,
+            But I wanted to save time here...
+            I was thinking that parsing this huge response for all urls,
+            and then matching responses to urls would be problematic and time-consuming.
+            So, currently I'm sending 1 request for 1 Url - which is probably bad.
         :param url_to_check: Url object that we want to validate.
         :return:
         """
         data = {
             "client": {
-              "clientId": "Grzegorz",
-              "clientVersion": "0.0.7"
+              "clientId": PROJECT_NAME,
+              "clientVersion": VERSION
             },
             "threatInfo": {
               "threatTypes": ["MALWARE", "SOCIAL_ENGINEERING"],
@@ -62,7 +66,7 @@ class GoogleSafeBrowsingApiClient(BaseClient):
         response = self.post(url=self.google_endpoints['scan-url'], data=json.dumps(data))
 
         # Store response data on the Url object.
-        url_to_check.google_data = response.json() if response is not None else None
+        url_to_check.google_data = dict(**response.json()) if response is not None else None
 
         # Return url object.
         return url_to_check

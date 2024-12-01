@@ -1,8 +1,10 @@
+import time
+from logging import Logger
+
 import httpx
 from httpx import ConnectTimeout, Response
+
 from src.log import logger
-from logging import Logger
-import time
 
 
 class BaseClient:

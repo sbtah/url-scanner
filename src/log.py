@@ -2,7 +2,6 @@ import logging
 import sys
 from logging import Formatter, StreamHandler
 
-
 logger = logging.getLogger('SEARCH')
 logger.setLevel(logging.INFO)
 handler = StreamHandler(stream=sys.stdout)

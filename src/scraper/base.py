@@ -1,18 +1,17 @@
-from playwright.async_api import async_playwright
-from lxml.html import HtmlElement, HTMLParser, fromstring, tostring
-from src.urls.url import Url
-from urllib.parse import urlsplit
-from src.log import logger
 from logging import Logger
+
 import html2text
+from lxml.html import HtmlElement, HTMLParser, fromstring, tostring
 from lxml.html.clean import Cleaner
+from playwright.async_api import async_playwright
+
+from src.log import logger
+from src.urls.url import Url
 
 
 class BaseScraper:
     """
-    Base scraper class containing logic for data extracting.
-    Each spider inheriting from this class expects to receive UserAgent and Proxy,
-    as well as initial Url object.
+    Base scraper class containing logic for data extraction.
     """
     def __init__(
         self,
