@@ -47,7 +47,10 @@ class BaseClient:
         - :arg headers: Dictionary with prepared headers for this request.
         """
         try:
-            with self.client() as client:
+            with self.client(
+                timeout=httpx.Timeout(30.0),
+                follow_redirects=True,
+            ) as client:
                 # Start measuring response time for url.
                 request_start: float = self.now_timestamp()
 
@@ -80,7 +83,10 @@ class BaseClient:
         - :arg headers: Dictionary with prepared headers for this request.
         """
         try:
-            async with self.aclient() as client:
+            async with self.aclient(
+                timeout=httpx.Timeout(30.0),
+                follow_redirects=True,
+            ) as client:
                 # Start measuring response time for url.
                 request_start: float = self.now_timestamp()
 
@@ -114,7 +120,10 @@ class BaseClient:
         - :arg data: Dictionary or Json with data payload.
         """
         try:
-            with self.client() as client:
+            with self.client(
+                timeout=httpx.Timeout(30.0),
+                follow_redirects=True,
+            ) as client:
                 # Start measuring response time for url.
                 request_start: float = self.now_timestamp()
 
@@ -148,7 +157,10 @@ class BaseClient:
         - :arg data: Dictionary or Json with data payload.
         """
         try:
-            async with self.client() as client:
+            async with self.aclient(
+                timeout=httpx.Timeout(30.0),
+                follow_redirects=True,
+            ) as client:
                 # Start measuring response time for url.
                 request_start: float = self.now_timestamp()
 

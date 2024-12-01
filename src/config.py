@@ -9,7 +9,7 @@ load_dotenv()
 VIRUS_API_KEY = os.environ.get('VIRUS_TOTAL_API_KEY')
 GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY')
 VERSION = '0.0.1'
-PROJECT_NAME = 'usc'
+PROJECT_NAME = 'URL-Scanner'
 
 
 USER_AGENTS = [

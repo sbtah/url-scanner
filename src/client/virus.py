@@ -1,4 +1,7 @@
+import asyncio
 import base64
+from collections import deque
+from typing import Collection
 
 from src.client.base import BaseClient
 from src.config import VIRUS_API_KEY
@@ -83,6 +86,52 @@ class VirusTotalApiClient(BaseClient):
         # Return url object.
         return url_to_check
 
+
+    async def arequest_url_report(
+        self,
+        *,
+        url_to_check: Url,
+    ) -> Url:
+        """
+        :param url_to_check:
+        :return:
+        """
+        # Prepare Url identifier for current Url object.
+        url_identifier: str = self.create_url_id(url=url_to_check.value)
+
+        # Send a request.
+        self.logger.debug(
+            f'({self.arequest_url_report.__qualname__}): url="{url_to_check.value}"',
+        )
+        response = await self.aget(url=self.virus_endpoints['url-report'].format(url_id=url_identifier))
+
+        # Store response data on the Url object.
+        url_to_check.virus_data = dict(**response.json()) if response is not None else None
+
+        # Return url object.
+        return url_to_check
+
+    async def run_reports(
+        self,
+        *,
+        urls_to_check: Collection[Url],
+    ) -> list[Url]:
+        """
+        Send asynchronous requests to the collection of Urls.
+        - :arg urls_to_check: Urls to be requested.
+        - :return: List of processed Url objects.
+        """
+        tasks: deque = deque()
+        for url in urls_to_check:
+            tasks.append(
+                asyncio.create_task(
+                    self.arequest_url_report(
+                        url_to_check=url,
+                    )
+                )
+            )
+        responses = await asyncio.gather(*tasks)
+        return responses
 
     def request_scan_url(
         self,

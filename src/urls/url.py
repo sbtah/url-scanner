@@ -60,7 +60,7 @@ class Url:
         return int(analysis_stats['malicious'])
 
     @property
-    def is_phishing(self):
+    def is_phishing(self) -> bool | None:
         """"""
         if self.virus_phishing_score is None:
             return None
@@ -182,7 +182,7 @@ class Url:
         """"""
         if self.browser_data is None:
             return None
-        screenshot_name: str = self.browser_data['screenshot']
+        screenshot_name: str = self.browser_data.get('screenshot', '')
         return str(screenshot_name)
 
     @property
@@ -196,10 +196,19 @@ class Url:
     def to_dict(self):
         return {
             'value': self.value,
+            'is_phishing': self.is_phishing,
+            'virus_phishing_score': self.virus_phishing_score,
+            'virus_harmless_score': self.virus_harmless_score,
+            'virus_undetected_score': self.virus_undetected_score,
+            'virus_suspicious_score': self.virus_suspicious_score,
+            'virus_error': self.virus_error,
             'probe_status': self.probe_status,
             'probe_is_alive': self.probe_is_alive,
             'browser_status': self.browser_status,
             'browser_is_alive': self.browser_is_alive,
             'screenshot': self.screenshot,
-            'webpage-blocked': self.blocked,
+            'webpage_blocked': self.blocked,
+            'safe_browsing_threat_types': self.google_threat_types,
+            'safe-browsing-platform-types': self.google_platform_types,
+            'safe-browsing-threats': self.google_threats,
         }

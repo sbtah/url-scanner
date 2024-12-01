@@ -5,7 +5,6 @@ import html2text
 from lxml.html import HtmlElement, HTMLParser, fromstring, tostring
 from lxml.html.clean import Cleaner
 from playwright.async_api import async_playwright
-
 from src.log import logger
 from src.urls.url import Url
 
@@ -81,10 +80,13 @@ class BaseScraper:
         :param content: Entire text from the webpage.
         :return: True if any of phrases were found, implying that page is flagged.
         """
+        # TODO:
+        # Improve this
         phrases = {
             'Suspected Phishing',
             'This website has been reported for potential phishing',
             'Stop! Deceptive page ahead!',
+            'Uwaga zagroźenie',
         }
         for _ in phrases:
             if _ in content:
@@ -98,11 +100,18 @@ class BaseScraper:
         response,
         html: HtmlElement,
     ) -> dict | None:
+        """
+        What data can I extract here ?
+        :param url_to_check:
+        :param response:
+        :param html:
+        :return:
+        """
         status = response.status
         page_content = self.extract_text(html=html)
         return {
             'status': status,
-            'screenshot': f'{id(url_to_check)}.png',
+            # 'screenshot': f'{id(url_to_check)}.png',
             'blocked': self.find_blocked_flags(content=page_content),
             # 'text_content': page_content,
         }
@@ -147,7 +156,7 @@ class BaseScraper:
 
                 # Make screenshot of requested page.
                 await asyncio.sleep(5)
-                await page.screenshot(path=f'{id(url_to_check)}.png', full_page=True)
+                # await page.screenshot(path=f'{id(url_to_check)}.png', full_page=True)
 
                 # Extract verification data from the webpage
                 verify_data: dict = self.verify_page(url_to_check=url_to_check, response=response, html=html)

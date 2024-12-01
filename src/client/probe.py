@@ -103,7 +103,7 @@ class Probe(BaseClient):
     ) -> list[Url]:
         """
         Send asynchronous probing requests.
-        - :arg urls_to_check: Iterable of Urls that we can loop over.
+        - :arg urls_to_check: Urls to be requested
         - :return: List of processed Url objects.
         """
         tasks: deque = deque()
