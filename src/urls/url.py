@@ -1,8 +1,13 @@
 class Url:
     """
-    Object representing a validated url.
+    Class representing an Url object that is being verified.
+    This object main role is to store responses from APIs
+        and calculate certain values from them.
+    Note:
+        Initially I wanted to use pydantic model for this task,
+        but later, I decided that I want hash-ability for this object
+        ( fast membership tests )
     """
-
     def __init__(
         self,
         *,
@@ -10,26 +15,20 @@ class Url:
         google_data: dict | None = None,
         virus_data: dict | None = None,
         browser_data: dict | None = None,
-        # virus_created_at: float | None = None,
-        # virus_last_analyzed_at: float | None = None,
-        # virus_last_analysis_stats: dict | None = None,
-        # virus_score_harmless: int | None = None,
-        # virus_score_malicious: int | None = None,
-        # virus_score_suspicious: int | None = None,
-        # virus_score_timeout: int | None = None,
-        # virus_score_undetected: int | None = None,
-    ):
+        probe_data: dict | None = None,
+    ) -> None:
+        """
+        :param value:
+        :param google_data:
+        :param virus_data:
+        :param browser_data:
+        :param probe_data:
+        """
         self.value: str = value
         self.google_data: dict | None = google_data
         self.virus_data: dict | None = virus_data
         self.browser_data: dict | None = browser_data
-        # # Attributes Virus
-        # # ['attributes']['first_submission_date']
-        # self.virus_created_at: float | None = virus_created_at
-        # # ['attributes']['last_analysis_date']
-        # self.virus_last_analyzed_at: float | None = virus_last_analyzed_at
-        # # ['attribute']['last_analysis_stats']
-        # self.virus_last_analysis_stats: dict | None = virus_last_analysis_stats
+        self.probe_data: dict | None = probe_data
 
     def __str__(self) -> str:
         return self.value
@@ -47,3 +46,109 @@ class Url:
 
     def serialize(self) -> dict:
         return self.__dict__
+
+    # Virus API calculated.
+    @property
+    def virus_phishing_score(self) -> int | None:
+        """
+        """
+        if self.virus_data is None:
+            return None
+        analysis_stats: dict | None = self.virus_data.get('data', {}).get('attributes', {}).get('last_analysis_stats')
+        if analysis_stats is None:
+            return None
+        return int(analysis_stats['malicious'])
+
+    @property
+    def virus_harmless_score(self) -> int | None:
+        """
+        """
+        if self.virus_data is None:
+            return None
+        analysis_stats: dict | None = self.virus_data.get('data', {}).get('attributes', {}).get('last_analysis_stats')
+        if analysis_stats is None:
+            return None
+        return int(analysis_stats['harmless'])
+
+    @property
+    def virus_undetected_score(self) -> int | None:
+        """
+        """
+        if self.virus_data is None:
+            return None
+        analysis_stats: dict | None = self.virus_data.get('data', {}).get('attributes', {}).get('last_analysis_stats')
+        if analysis_stats is None:
+            return None
+        return int(analysis_stats['undetected'])
+
+    @property
+    def virus_suspicious_score(self) -> int | None:
+        """
+        """
+        if self.virus_data is None:
+            return None
+        analysis_stats: dict | None = self.virus_data.get('data', {}).get('attributes', {}).get('last_analysis_stats')
+        if analysis_stats is None:
+            return None
+        return int(analysis_stats['suspicious'])
+
+    @property
+    def virus_error(self) -> None | str:
+        """"""
+        if self.virus_data is None:
+            return None
+        error_data: dict | None = self.virus_data.get('error', {}).get('code', {})
+        if error_data is None:
+            return None
+        return str(error_data)
+
+    @property
+    def google_threat_types(self) -> list | None:
+        """"""
+        if self.google_data is None:
+            return None
+        matches: list | None = self.google_data.get('matches')
+        if matches is None:
+            return None
+        return [str(data['threatType']) for data in matches]
+
+    # Google API calculated.
+    @property
+    def google_platform_types(self) -> list | None:
+        """"""
+        if self.google_data is None:
+            return None
+        matches: list | None = self.google_data.get('matches')
+        if matches is None:
+            return None
+        return [str(data['platformType']) for data in matches]
+
+    @property
+    def google_threats(self) -> list | None:
+        """"""
+        if self.google_data is None:
+            return None
+        matches: list | None = self.google_data.get('matches')
+        if matches is None:
+            return None
+        return [dict(data['threat']) for data in matches]
+
+    # Probe calculated.
+    @property
+    def status(self) -> str | None:
+        """"""
+        if self.probe_data is None:
+            return None
+        status: str | None = self.probe_data.get('status')
+        return str(status)
+
+    @property
+    def is_alive(self):
+        """
+        Indicator that page returned a status code in either 200 or 300 range.
+        :return: Bool or None
+        """
+        if self.probe_data is None:
+            return None
+        alive = self.status.startswith('2') or self.status.startswith('3')
+        return alive

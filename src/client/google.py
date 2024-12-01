@@ -9,17 +9,19 @@ from collections import deque
 
 class GoogleSafeBrowsingApiClient(BaseClient):
     """
+    Specialized Api Client for interacting with Google Safe Browsing Api.
+    https://developers.google.com/safe-browsing
+
     The Safe Browsing APIs (v4) let your client applications check URLs
     against Google's constantly updated lists of unsafe web resources
     """
-
     def __init__(self, *args, **kwargs) -> None:
         self.GOOGLE_KEY: str = GOOGLE_API_KEY
         super().__init__(*args, **kwargs)
 
     @property
     def headers(self) -> dict:
-        """Prepare request headers for request to VirusTotalApi."""
+        """Prepare headers for requests to Google Safe Browsing Api."""
         return {
             'Accept': 'application/json',
         }
@@ -31,13 +33,14 @@ class GoogleSafeBrowsingApiClient(BaseClient):
             'scan-url': f'https://safebrowsing.googleapis.com/v4/threatMatches:find?key={self.GOOGLE_KEY}',
         }
 
-    async def request_scan_url(
+    def request_url_report(
         self,
         *,
-        url_to_scan: Url,
-    ) -> dict | None:
+        url_to_check: Url,
+    ) -> Url:
         """
-        :param url_to_scan:
+        Send a post request with url we want to check in Safe Browsing Api.
+        :param url_to_check: Url object that we want to validate.
         :return:
         """
         data = {
@@ -49,35 +52,17 @@ class GoogleSafeBrowsingApiClient(BaseClient):
               "threatTypes": ["MALWARE", "SOCIAL_ENGINEERING"],
               "platformTypes":["WINDOWS"],
               "threatEntryTypes": ["URL"],
-              "threatEntries": [{'url': url_to_scan.value},],
+              "threatEntries": [{'url': url_to_check.value},],
             }
         }
         # Send a request.
         self.logger.info(
-            f'SCANNING: url="{url_to_scan.value}"',
+            f'({self.request_url_report.__qualname__}): url="{url_to_check.value}"',
         )
-        response = await self.post(url=self.google_endpoints['scan-url'], data=json.dumps(data))
+        response = self.post(url=self.google_endpoints['scan-url'], data=json.dumps(data))
 
-        # Return json.
-        return response.json() if response is not None else None
+        # Store response data on the Url object.
+        url_to_check.google_data = response.json() if response is not None else None
 
-    async def run_scans(self, urls: Collection[Url]):
-        """
-        Sends requests to many urls.
-        - :arg iterator_of_urls: Iterator of URLs.
-        """
-        tasks: deque = deque()
-        try:
-            for url in urls:
-                tasks.append(
-                    asyncio.create_task(
-                        self.request_scan_url(
-                            url_to_scan=url,
-                        )
-                    )
-                )
-            responses = await asyncio.gather(*tasks)
-            return responses
-        except Exception as e:
-            self.logger.error(f'(get_requests) Some other exception: {e}')
-            return None
+        # Return url object.
+        return url_to_check
