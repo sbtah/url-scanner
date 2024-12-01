@@ -4,17 +4,20 @@ from src.client.google import GoogleSafeBrowsingApiClient
 from src.client.probe import Probe
 import httpx
 from src.urls.url import Url
-from src.config import VERSION
+from src.config import VERSION, PROJECT_NAME
 from src.scraper.scraper import Scraper
 import asyncio
 from src.config import USER_AGENTS, RESOLUTIONS
 from src.scraper.scraper import Scraper
 import click
-
+from src.commands import scanning
 
 
 url = "https://www.virustotal.com/api/v3/public/urls"
 
+
+# https://cert.pl/en/warning-list/
+# https://hole.cert.pl/domains/v2/domains.txt
 
 def get_openphish_sample():
     res = httpx.get('https://raw.githubusercontent.com/openphish/public_feed/refs/heads/main/feed.txt')
@@ -31,14 +34,17 @@ def load_urls():
         return [Url(value=line.strip('\n')) for line in lines]
 
 
-@click.command('hello')
-@click.version_option(VERSION, prog_name='URL Scanner')
-def hello():
-    click.echo("Hello, World!")
+@click.group()
+def cli():
+    click.echo(f'Welcome to {PROJECT_NAME}')
+
+
+cli.add_command(scanning.scan_single)
+cli.add_command(scanning.scan_file)
+
 
 if __name__ == '__main__':
-    hello()
-
+    cli()
     # # GOOGLE
     # client = GoogleSafeBrowsingApiClient()
     # url_to_test = 'https://bantuan-customer-dana-id.0ffice.biz.id/'
@@ -61,7 +67,7 @@ if __name__ == '__main__':
     # print(url_object.virus_error)
 
     # urls = load_urls()
-    # urls = urls[30: 36]
+    # urls = urls[40: 45]
 
     # # PROBE
     # probe = Probe(user_agent=USER_AGENTS[0])

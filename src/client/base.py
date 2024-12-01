@@ -66,7 +66,7 @@ class BaseClient:
                 setattr(res, 'current_response_time', current_response_time)
                 return res
         except Exception as exc:
-            self.logger.error(
+            self.logger.debug(
                 f'({self.get.__qualname__}): exception="{exc.__class__}", message="{exc}"', exc_info=True
             )
             return None
@@ -134,7 +134,7 @@ class BaseClient:
                 setattr(res, 'current_response_time', current_response_time)
                 return res
         except Exception as exc:
-            self.logger.error(
+            self.logger.debug(
                 f'({self.post.__qualname__}): exception="{exc.__class__}", message="{exc}"', exc_info=True
             )
             return None
@@ -167,7 +167,7 @@ class BaseClient:
                 setattr(res, 'current_response_time', current_response_time)
                 return res
         except Exception as exc:
-            self.logger.error(
+            self.logger.debug(
                 f'({self.post.__qualname__}): exception="{exc.__class__}", message="{exc}"', exc_info=True
             )
             return None

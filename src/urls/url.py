@@ -60,6 +60,13 @@ class Url:
         return int(analysis_stats['malicious'])
 
     @property
+    def is_phishing(self):
+        """"""
+        if self.virus_phishing_score is None:
+            return None
+        return self.virus_phishing_score > 3
+
+    @property
     def virus_harmless_score(self) -> int | None:
         """
         """
@@ -135,7 +142,7 @@ class Url:
 
     # Probe calculated.
     @property
-    def status(self) -> str | None:
+    def probe_status(self) -> str | None:
         """"""
         if self.probe_data is None:
             return None
@@ -143,12 +150,56 @@ class Url:
         return str(status)
 
     @property
-    def is_alive(self):
+    def probe_is_alive(self) -> bool | None:
         """
         Indicator that page returned a status code in either 200 or 300 range.
         :return: Bool or None
         """
         if self.probe_data is None:
             return None
-        alive = self.status.startswith('2') or self.status.startswith('3')
+        alive = self.probe_status.startswith('2') or self.probe_status.startswith('3')
         return alive
+
+    # Browser checks.
+    @property
+    def browser_status(self) -> str | None:
+        """"""
+        if self.browser_data is None:
+            return None
+        status: str = self.browser_data['status']
+        return str(status)
+
+    @property
+    def browser_is_alive(self) -> bool | None:
+        """"""
+        if self.browser_data is None:
+            return None
+        alive = self.browser_status.startswith('2') or self.browser_status.startswith('3')
+        return alive
+
+    @property
+    def screenshot(self) -> str | None:
+        """"""
+        if self.browser_data is None:
+            return None
+        screenshot_name: str = self.browser_data['screenshot']
+        return str(screenshot_name)
+
+    @property
+    def blocked(self) -> bool | None:
+        """"""
+        if self.browser_data is None:
+            return None
+        blocked: bool = self.browser_data['blocked']
+        return blocked
+
+    def to_dict(self):
+        return {
+            'value': self.value,
+            'probe_status': self.probe_status,
+            'probe_is_alive': self.probe_is_alive,
+            'browser_status': self.browser_status,
+            'browser_is_alive': self.browser_is_alive,
+            'screenshot': self.screenshot,
+            'webpage-blocked': self.blocked,
+        }

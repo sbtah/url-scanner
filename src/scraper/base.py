@@ -1,3 +1,4 @@
+import asyncio
 from logging import Logger
 
 import html2text
@@ -74,7 +75,7 @@ class BaseScraper:
         return content
 
     @staticmethod
-    def find_phishing_flags(*, content: str) -> bool:
+    def find_blocked_flags(*, content: str) -> bool:
         """
         Find certain phrases in page text that may indicate that page is flagged as a phishing.
         :param content: Entire text from the webpage.
@@ -83,6 +84,7 @@ class BaseScraper:
         phrases = {
             'Suspected Phishing',
             'This website has been reported for potential phishing',
+            'Stop! Deceptive page ahead!',
         }
         for _ in phrases:
             if _ in content:
@@ -101,7 +103,8 @@ class BaseScraper:
         return {
             'status': status,
             'screenshot': f'{id(url_to_check)}.png',
-            'phishing-flag': self.find_phishing_flags(content=page_content),
+            'blocked': self.find_blocked_flags(content=page_content),
+            # 'text_content': page_content,
         }
 
     async def avisit_url(
@@ -115,13 +118,14 @@ class BaseScraper:
         try:
             async with async_playwright() as pw:
                 # Prepare browser initial parameters
-                launch_params = {'headless': self.headless}
+                launch_kwargs = {'headless': self.headless}
                 if proxy_settings is not None:
-                    launch_params['proxy'] = proxy_settings
+                    launch_kwargs['proxy'] = proxy_settings
 
                 # Launch browser.
                 browser = await pw.chromium.launch(
-                    headless=self.headless
+                    args=['--start-maximized'],
+                    **launch_kwargs
                 )
 
                 # Prepare and start new context.
@@ -142,6 +146,7 @@ class BaseScraper:
                 html = self.html(page_source=await page.content(), base_url=page.url)
 
                 # Make screenshot of requested page.
+                await asyncio.sleep(5)
                 await page.screenshot(path=f'{id(url_to_check)}.png', full_page=True)
 
                 # Extract verification data from the webpage

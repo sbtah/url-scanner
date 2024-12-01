@@ -72,7 +72,7 @@ class VirusTotalApiClient(BaseClient):
         # Prepare Url identifier for current Url object.
         url_identifier: str = self.create_url_id(url=url_to_check.value)
         # Send a request.
-        self.logger.info(
+        self.logger.debug(
             f'({self.request_url_report.__qualname__}): url="{url_to_check.value}"',
         )
         response = self.get(url=self.virus_endpoints['url-report'].format(url_id=url_identifier))
@@ -98,7 +98,7 @@ class VirusTotalApiClient(BaseClient):
         payload = {"url": url_to_scan.value}
 
         # Send a request.
-        self.logger.info(
+        self.logger.debug(
             f'({self.request_scan_url.__qualname__}):: url="{url_to_scan.value}"',
         )
         response = self.post(url=self.virus_endpoints['scan-url'], data=payload)

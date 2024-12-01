@@ -41,7 +41,7 @@ class Probe(BaseClient):
         :param url_to_check:
         :return:
         """
-        self.logger.info(
+        self.logger.debug(
             f'({self.probe_url.__qualname__}): url="{url_to_check.value}"',
         )
         response = self.get(url=url_to_check.value)
@@ -73,7 +73,7 @@ class Probe(BaseClient):
         :param url_to_check:
         :return:
         """
-        self.logger.info(
+        self.logger.debug(
             f'({self.probe_url.__qualname__}): url="{url_to_check.value}"',
         )
         response = await self.aget(url=url_to_check.value)
