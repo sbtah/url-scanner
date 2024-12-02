@@ -2,24 +2,30 @@
 
 """
 import asyncio
+import json
 import os
-from src.client.virus import VirusTotalApiClient
+import time
+from collections import deque
+
+import click
 from src.client.google import GoogleSafeBrowsingApiClient
 from src.client.probe import Probe
-from src.scraper.scraper import Scraper
-from src.config import USER_AGENTS, RESOLUTIONS
+from src.client.virus import VirusTotalApiClient
+from src.config import RESOLUTIONS, USER_AGENTS
 from src.log import logger
+from src.scraper.scraper import Scraper
 from src.urls.url import Url
-import time
-from typing import Collection
-from collections import deque
-import json
-import click
 
 
 class BaseAnalyzer:
     """
     Analyzer class that integrates APi Clients, Scraper and a Probe class.
+    Analyzer can process either single url or many urls asynchronously.
+    Under the hood the most basic and important object is a `Url` class,
+    defined in `src.urls.url` module.
+    Url objects are used as a data storage,
+    for data coming from different detection and verification mechanism.
+    - Api calls, browser checks or request checks.
     """
     def __init__(self, *args, **kwargs):
         self.virus_client = VirusTotalApiClient()
@@ -33,7 +39,7 @@ class BaseAnalyzer:
         self.queue: deque = deque()
         # Ratelimiting and other spells.
         self.max_requests: int = 4
-        self.cooldown: int = 25
+        self.cooldown: int = 60
         super().__init__(*args, **kwargs)
 
     @staticmethod
@@ -64,7 +70,7 @@ class BaseAnalyzer:
         ...
 
 
-    async def astart(self, *, file_path: str) -> None:
+    async def file_start(self, *, file_path: str) -> None:
         """
         Lood urls to found urls set and proceed verification.
         :param file_path:
@@ -77,9 +83,25 @@ class BaseAnalyzer:
         urls_list = self.load_text_file(file_path=file_path)
         self.found_urls.update(urls_list[:100])
         await self.arun()
-        self.save_to_file(file_name=file_path)
+        self.save_to_json(file_name=file_path)
 
-    async def arun(self):
+    def single_start(self, *, url: str) -> None:
+        """
+        :param url:
+        :return:
+        """
+        click.echo(f'Starting full scan for: {url}')
+        url_object: Url = self.create_url(value=url)
+
+        self.prober.probe_url(url_to_check=url_object)
+        self.google_client.request_url_report(url_to_check=url_object)
+        self.scraper.visit_url(url_to_check=url_object, user_agent=USER_AGENTS[0], resolution=RESOLUTIONS[0])
+        self.virus_client.request_url_report(url_to_check=url_object)
+
+        click.echo(f'Report for url="{url}":  ')
+        click.echo(f'{json.dumps(url_object.to_dict(), indent=2)}')
+
+    async def arun(self) -> None:
         """
         """
         while len(self.found_urls) > 0:
@@ -93,6 +115,7 @@ class BaseAnalyzer:
             await self.scraper.run_visits(urls_to_check=self.queue, user_agent=USER_AGENTS[0], resolution=RESOLUTIONS[0])
             await self.virus_client.run_reports(urls_to_check=self.queue)
 
+            # Remove processed urls from `found_urls` set.
             self.found_urls.difference_update(self.queue)
             self.clear_queue()
             # Here I will rate limit myself because of Free tier on Virus Total...
@@ -176,9 +199,9 @@ class BaseAnalyzer:
                 detected += 1
         return detected / total
 
-    def save_to_file(self, file_name: str):
+    def save_to_json(self, file_name: str):
         """"""
-        with open(f'Report-{file_name}.json', 'w') as file:
+        with open(f'File-Report:{file_name}.json', 'w') as file:
             file.write('[\n')
             for idx, url in enumerate(self.processed_urls):
                 if idx == 0:

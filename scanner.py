@@ -13,7 +13,6 @@ cli.add_command(scanning.scan_single)
 cli.add_command(scanning.scan_file)
 cli.add_command(feed.openphish)
 cli.add_command(feed.cert)
-cli.add_command(feed.lol)
 
 
 if __name__ == '__main__':

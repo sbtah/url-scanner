@@ -1,10 +1,12 @@
 import asyncio
+import time
 from logging import Logger
 
 import html2text
 from lxml.html import HtmlElement, HTMLParser, fromstring, tostring
 from lxml.html.clean import Cleaner
 from playwright.async_api import async_playwright
+from playwright.sync_api import sync_playwright
 from src.log import logger
 from src.urls.url import Url
 
@@ -115,6 +117,60 @@ class BaseScraper:
             'blocked': self.find_blocked_flags(content=page_content),
             # 'text_content': page_content,
         }
+
+    def visit_url(
+        self,
+        *,
+        url_to_check: Url,
+        user_agent: str,
+        resolution: str,
+        proxy_settings: dict | None = None):
+        """"""
+        try:
+            with sync_playwright() as pw:
+                # Prepare browser initial parameters
+                launch_kwargs = {'headless': self.headless}
+                if proxy_settings is not None:
+                    launch_kwargs['proxy'] = proxy_settings
+
+                # Launch browser.
+                browser = pw.chromium.launch(
+                    args=['--start-maximized'],
+                    **launch_kwargs
+                )
+
+                # Prepare and start new context.
+                viewport = self.viewport(resolution=resolution)
+                context = browser.new_context(
+                    viewport=viewport,
+                    user_agent=user_agent,
+                )
+                page = context.new_page()
+
+                # Navigate to a website
+                response = page.goto(
+                    url_to_check.value,
+                    wait_until='domcontentloaded',
+                )
+
+                # Prepare lxml HtmlElement and do whatever you want with it.
+                html = self.html(page_source=page.content(), base_url=page.url)
+
+                # Make screenshot of requested page.
+                time.sleep(5)
+                # await page.screenshot(path=f'{id(url_to_check)}.png', full_page=True)
+
+                # Extract verification data from the webpage
+                verify_data: dict = self.verify_page(url_to_check=url_to_check, response=response, html=html)
+                url_to_check.browser_data = dict(**verify_data)
+
+                return url_to_check
+        except Exception as exc:
+            self.logger.debug(
+                f'({self.avisit_url.__qualname__}): exception="{exc.__class__}", '
+                f'message="{exc}", url="{url_to_check.value}"', exc_info=True
+            )
+            return url_to_check
 
     async def avisit_url(
         self,
