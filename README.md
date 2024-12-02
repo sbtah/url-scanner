@@ -27,7 +27,7 @@ that may indicate that a page has been blocked.
 
 ## Current state of development:
 ### Scanning:
-`scan-single` and `scan-files` features are working.
+`scan-single` and `scan-file` features are working.
 Users can either scan a single url or collection of urls from the file.
 Single scans are sent synchronously, while processing of urls from the file was implemented with asynchronous logic.
 
@@ -36,7 +36,7 @@ But right now single scan is returning data that VirusTotal actually has about u
 #### Single scan important:
 - `scan-single` is returning data that VirusTotal actually has for this url.
 #### File scan important:
-- `scan-files` is currently rate limited on Analyzer class to sent 4 request per 60 seconds.
+- `scan-file` is currently rate limited on Analyzer class to sent 4 request per 60 seconds.
 Because I was using VirusTotal Free tier access.
 - 
 
