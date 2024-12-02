@@ -27,12 +27,21 @@ that may indicate that a page has been blocked.
 
 ## Current state of development:
 ### Scanning:
-Single and file scans are working. Users can either scan a single url or collection of urls from the file.
-Right now only simple text files are supported. Urls on new lines.
-Scan implies that url will be tested with all 4 mechanisms at once.
+`scan-single` and `scan-files` features are working.
+Users can either scan a single url or collection of urls from the file.
 Single scans are sent synchronously, while processing of urls from the file was implemented with asynchronous logic.
 
+I also implemented a call to endpoint where you can request given Url to be scanned.
+But right now single scan is returning data that VirusTotal actually has about url. 
+#### Single scan important:
+- `scan-single` is returning data that VirusTotal actually has for this url.
+#### File scan important:
+- `scan-files` is currently rate limited on Analyzer class to sent 4 request per 60 seconds.
+Because I was using VirusTotal Free tier access.
+- 
+
 ### Data sources:
+`open-phish-file` and `cert-file` features are working.
 Right now user can load urls from 2 data sources OpenPhish and Cert txt samples.
 
 ### Data assessment:
