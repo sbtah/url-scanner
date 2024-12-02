@@ -23,6 +23,7 @@ class BaseScraper:
         self.logger: Logger = logger
         self._domain: str | None = None
 
+
     @staticmethod
     def viewport(*, resolution: str):
         """

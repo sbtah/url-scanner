@@ -81,7 +81,7 @@ class BaseAnalyzer:
             return
 
         urls_list = self.load_text_file(file_path=file_path)
-        self.found_urls.update(urls_list[:100])
+        self.found_urls.update(urls_list)
         await self.arun()
         self.save_to_json(file_name=file_path)
 
